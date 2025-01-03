@@ -107,14 +107,16 @@ restart_vnc() {
     rm -rf /tmp/.X1-lock
     rm -rf /tmp/.X11-unix/X1
     
+    # Генерируем новый пароль
+    VNC_PASS=$(openssl rand -base64 8)
+    echo $VNC_PASS | vncpasswd -f > ~/.vnc/passwd
+    chmod 600 ~/.vnc/passwd
+    
     # Запускаем заново
     vncserver :1 -geometry 1920x1080 -depth 24
     
     # Получаем IP адрес сервера
     SERVER_IP=$(curl -s ifconfig.me)
-    
-    # Получаем сохраненный пароль
-    VNC_PASS=$(cat ~/.vnc/passwd.txt)
     
     echo -e "${GREEN}[✓] VNC сервер перезапущен${NC}"
     echo -e "\n${YELLOW}Для подключения используйте:${NC}"

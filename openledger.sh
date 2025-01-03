@@ -26,7 +26,7 @@ install_openledger() {
     
     # Установка зависимостей
     apt update && apt upgrade -y
-    apt install -y wget unzip tightvncserver xfce4 xfce4-goodies dbus-x11 x11-xserver-utils
+    apt install -y wget unzip tightvncserver xfce4 xfce4-goodies dbus-x11 x11-xserver-utils autocutsel
 
     # Загрузка и установка OpenLedger
     wget https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
@@ -48,6 +48,7 @@ export XDG_SESSION_DESKTOP="xfce"
 # Запуск autocutsel для синхронизации буферов обмена
 autocutsel -fork
 autocutsel -selection PRIMARY -fork
+autocutsel -selection CLIPBOARD -fork
 
 [ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
 [ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
@@ -77,20 +78,12 @@ EOF
     rm -rf /tmp/.X1-lock
     rm -rf /tmp/.X11-unix/X1
     
-    # Запускаем TigerVNC с явными параметрами для буфера обмена
+    # Запускаем VNC с базовыми параметрами
     vncserver :1 \
     -geometry 1920x1080 \
     -depth 24 \
     -localhost no \
-    -SecurityTypes VncAuth \
-    -SelectionOwner \
-    -AcceptClipboard=true \
-    -SendClipboard=true \
-    -AcceptCutText=true \
-    -SendCutText=true \
-    -AcceptPointerEvents=true \
-    -AcceptKeyEvents=true \
-    -RemoteResize=true
+    -SecurityTypes VncAuth
 
     # Открытие порта в файрволе
     ufw allow 5901/tcp
@@ -139,6 +132,7 @@ export XDG_SESSION_DESKTOP="xfce"
 # Запуск autocutsel для синхронизации буферов обмена
 autocutsel -fork
 autocutsel -selection PRIMARY -fork
+autocutsel -selection CLIPBOARD -fork
 
 [ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
 [ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources

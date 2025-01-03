@@ -110,9 +110,13 @@ restart_vnc() {
     # Получаем IP адрес сервера
     SERVER_IP=$(curl -s ifconfig.me)
     
+    # Получаем текущий пароль из файла
+    VNC_PASS=$(cat ~/.vnc/passwd | base64)
+    
     echo -e "${GREEN}[✓] VNC сервер перезапущен${NC}"
     echo -e "\n${YELLOW}Для подключения используйте:${NC}"
     echo -e "Адрес: ${GREEN}${SERVER_IP}:5901${NC}"
+    echo -e "Пароль: ${GREEN}${VNC_PASS}${NC}"
 }
 
 # Главное меню

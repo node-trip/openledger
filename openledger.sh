@@ -26,7 +26,7 @@ install_openledger() {
     
     # Установка зависимостей
     apt update && apt upgrade -y
-    apt install -y wget unzip tightvncserver xfce4 xfce4-goodies dbus-x11 x11-xserver-utils autocutsel
+    apt install -y wget unzip tightvncserver xfce4 xfce4-goodies dbus-x11 x11-xserver-utils autocutsel gnome-terminal
 
     # Загрузка и установка OpenLedger
     wget https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip

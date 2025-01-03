@@ -45,6 +45,10 @@ export XKL_XMODMAP_DISABLE=1
 export XDG_CURRENT_DESKTOP="XFCE"
 export XDG_SESSION_DESKTOP="xfce"
 
+# Запуск autocutsel для синхронизации буферов обмена
+autocutsel -fork
+autocutsel -selection PRIMARY -fork
+
 [ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
 [ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
 
@@ -73,8 +77,14 @@ EOF
     rm -rf /tmp/.X1-lock
     rm -rf /tmp/.X11-unix/X1
     
-    # Запуск VNC сервера с безопасными параметрами
-    vncserver :1 -geometry 1920x1080 -depth 24
+    # Запускаем заново с включенным буфером обмена
+    vncserver :1 \
+    -geometry 1920x1080 \
+    -depth 24 \
+    -localhost no \
+    -SecurityTypes VncAuth \
+    -clipboard \
+    -AlwaysShared
 
     # Открытие порта в файрволе
     ufw allow 5901/tcp
@@ -119,6 +129,10 @@ unset DBUS_SESSION_BUS_ADDRESS
 export XKL_XMODMAP_DISABLE=1
 export XDG_CURRENT_DESKTOP="XFCE"
 export XDG_SESSION_DESKTOP="xfce"
+
+# Запуск autocutsel для синхронизации буферов обмена
+autocutsel -fork
+autocutsel -selection PRIMARY -fork
 
 [ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
 [ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources

@@ -77,14 +77,20 @@ EOF
     rm -rf /tmp/.X1-lock
     rm -rf /tmp/.X11-unix/X1
     
-    # Запускаем заново с включенным буфером обмена
+    # Запускаем TigerVNC с явными параметрами для буфера обмена
     vncserver :1 \
     -geometry 1920x1080 \
     -depth 24 \
     -localhost no \
     -SecurityTypes VncAuth \
-    -clipboard \
-    -AlwaysShared
+    -SelectionOwner \
+    -AcceptClipboard=true \
+    -SendClipboard=true \
+    -AcceptCutText=true \
+    -SendCutText=true \
+    -AcceptPointerEvents=true \
+    -AcceptKeyEvents=true \
+    -RemoteResize=true
 
     # Открытие порта в файрволе
     ufw allow 5901/tcp

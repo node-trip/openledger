@@ -17,21 +17,42 @@ print_header() {
     echo -e "${GREEN}═══════════════════════════════════════════════════${NC}"
 }
 
-# Функция установки OpenLedger
+# Функция установки OpenLedger и VNC
 install_openledger() {
-    echo -e "\n${YELLOW}[+] Установка OpenLedger Node...${NC}"
+    echo -e "\n${YELLOW}[+] Установка OpenLedger Node и VNC...${NC}"
     
     # Установка зависимостей
     apt update && apt upgrade -y
-    apt install -y wget unzip
+    apt install -y wget unzip tightvncserver xfce4 xfce4-goodies
 
-    # Загрузка и установка
+    # Загрузка и установка OpenLedger
     wget https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
     unzip openledger-node-1.0.0-linux.zip
     apt install -y ./openledger-node-1.0.0.deb
 
-    echo -e "${GREEN}[✓] OpenLedger Node установлен${NC}"
-    echo -e "\n${YELLOW}Для запуска используйте:${NC}"
+    # Настройка VNC
+    mkdir -p ~/.vnc
+    echo "#!/bin/bash
+xrdb $HOME/.Xresources
+startxfce4 &" > ~/.vnc/xstartup
+    chmod +x ~/.vnc/xstartup
+
+    # Генерация пароля для VNC
+    VNC_PASS=$(openssl rand -base64 8)
+    echo $VNC_PASS | vncpasswd -f > ~/.vnc/passwd
+    chmod 600 ~/.vnc/passwd
+
+    # Запуск VNC сервера
+    vncserver :1 -geometry 1280x800 -depth 24
+
+    # Открытие порта в файрволе
+    ufw allow 5901/tcp
+
+    echo -e "${GREEN}[✓] OpenLedger Node и VNC установлены${NC}"
+    echo -e "\n${YELLOW}Для подключения используйте VNC Viewer:${NC}"
+    echo -e "Адрес: ${GREEN}ваш_сервер:5901${NC}"
+    echo -e "Пароль: ${GREEN}$VNC_PASS${NC}"
+    echo -e "\n${YELLOW}Для запуска OpenLedger используйте:${NC}"
     echo -e "${BLUE}openledger-node --no-sandbox${NC}"
 }
 
@@ -49,7 +70,7 @@ show_menu() {
     while true; do
         print_header
         echo -e "\n${YELLOW}Выберите действие:${NC}"
-        echo -e "${GREEN}1.${NC} Установить OpenLedger Node"
+        echo -e "${GREEN}1.${NC} Установить OpenLedger Node и VNC"
         echo -e "${RED}2.${NC} Удалить OpenLedger Node"
         echo -e "${GREEN}3.${NC} Выход"
         

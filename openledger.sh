@@ -93,7 +93,7 @@ remove_openledger() {
     echo -e "${GREEN}[✓] OpenLedger Node удален${NC}"
 }
 
-# Добавим новую функцию для перезапуска VNC
+# Функция перезапуска VNC
 restart_vnc() {
     echo -e "\n${YELLOW}[+] Перезапуск VNC сервера...${NC}"
     
@@ -107,7 +107,12 @@ restart_vnc() {
     # Запускаем заново
     vncserver :1 -geometry 1920x1080 -depth 24
     
+    # Получаем IP адрес сервера
+    SERVER_IP=$(curl -s ifconfig.me)
+    
     echo -e "${GREEN}[✓] VNC сервер перезапущен${NC}"
+    echo -e "\n${YELLOW}Для подключения используйте:${NC}"
+    echo -e "Адрес: ${GREEN}${SERVER_IP}:5901${NC}"
 }
 
 # Главное меню

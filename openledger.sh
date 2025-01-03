@@ -103,9 +103,35 @@ restart_vnc() {
     # Убиваем текущую сессию
     vncserver -kill :1 >/dev/null 2>&1 || true
     
-    # Очищаем файлы блокировки
+    # Полная очистка VNC
+    rm -rf ~/.vnc/*
     rm -rf /tmp/.X1-lock
     rm -rf /tmp/.X11-unix/X1
+    
+    # Создаем конфиг заново
+    mkdir -p ~/.vnc
+    
+    # Создаем улучшенный xstartup
+    cat > ~/.vnc/xstartup << 'EOF'
+#!/bin/bash
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+export XKL_XMODMAP_DISABLE=1
+export XDG_CURRENT_DESKTOP="XFCE"
+export XDG_SESSION_DESKTOP="xfce"
+
+[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
+[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+
+/usr/bin/startxfce4
+EOF
+    chmod +x ~/.vnc/xstartup
+
+    # Настройка буфера обмена
+    cat > ~/.vnc/config << 'EOF'
+ClipboardRecv=1
+ClipboardSend=1
+EOF
     
     # Генерируем новый пароль
     VNC_PASS=$(openssl rand -base64 8)

@@ -62,6 +62,9 @@ EOF
     VNC_PASS=$(openssl rand -base64 8)
     echo $VNC_PASS | vncpasswd -f > ~/.vnc/passwd
     chmod 600 ~/.vnc/passwd
+    # Сохраняем пароль в читаемом виде
+    echo $VNC_PASS > ~/.vnc/passwd.txt
+    chmod 600 ~/.vnc/passwd.txt
 
     # Сначала убиваем все существующие сессии VNC
     vncserver -kill :1 >/dev/null 2>&1 || true
@@ -110,8 +113,8 @@ restart_vnc() {
     # Получаем IP адрес сервера
     SERVER_IP=$(curl -s ifconfig.me)
     
-    # Получаем текущий пароль из файла
-    VNC_PASS=$(cat ~/.vnc/passwd | base64)
+    # Получаем сохраненный пароль
+    VNC_PASS=$(cat ~/.vnc/passwd.txt)
     
     echo -e "${GREEN}[✓] VNC сервер перезапущен${NC}"
     echo -e "\n${YELLOW}Для подключения используйте:${NC}"

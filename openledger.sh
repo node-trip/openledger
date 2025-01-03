@@ -21,9 +21,12 @@ print_header() {
 install_openledger() {
     echo -e "\n${YELLOW}[+] Установка OpenLedger Node и VNC...${NC}"
     
+    # Получаем IP адрес сервера
+    SERVER_IP=$(curl -s ifconfig.me)
+    
     # Установка зависимостей
     apt update && apt upgrade -y
-    apt install -y wget unzip tightvncserver xfce4 xfce4-goodies
+    apt install -y wget unzip tightvncserver xfce4 xfce4-goodies dbus-x11 x11-xserver-utils
 
     # Загрузка и установка OpenLedger
     wget https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
@@ -32,25 +35,50 @@ install_openledger() {
 
     # Настройка VNC
     mkdir -p ~/.vnc
-    echo "#!/bin/bash
-xrdb $HOME/.Xresources
-startxfce4 &" > ~/.vnc/xstartup
+    
+    # Создаем улучшенный xstartup
+    cat > ~/.vnc/xstartup << 'EOF'
+#!/bin/bash
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+export XKL_XMODMAP_DISABLE=1
+export XDG_CURRENT_DESKTOP="XFCE"
+export XDG_SESSION_DESKTOP="xfce"
+
+[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
+[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+
+/usr/bin/startxfce4
+EOF
     chmod +x ~/.vnc/xstartup
+
+    # Настройка буфера обмена
+    cat > ~/.vnc/config << 'EOF'
+ClipboardRecv=1
+ClipboardSend=1
+EOF
 
     # Генерация пароля для VNC
     VNC_PASS=$(openssl rand -base64 8)
     echo $VNC_PASS | vncpasswd -f > ~/.vnc/passwd
     chmod 600 ~/.vnc/passwd
 
-    # Запуск VNC сервера
-    vncserver :1 -geometry 1280x800 -depth 24
+    # Сначала убиваем все существующие сессии VNC
+    vncserver -kill :1 >/dev/null 2>&1 || true
+    
+    # Очищаем старые файлы блокировки если они есть
+    rm -rf /tmp/.X1-lock
+    rm -rf /tmp/.X11-unix/X1
+    
+    # Запуск VNC сервера с безопасными параметрами
+    vncserver :1 -geometry 1920x1080 -depth 24
 
     # Открытие порта в файрволе
     ufw allow 5901/tcp
 
     echo -e "${GREEN}[✓] OpenLedger Node и VNC установлены${NC}"
     echo -e "\n${YELLOW}Для подключения используйте VNC Viewer:${NC}"
-    echo -e "Адрес: ${GREEN}ваш_сервер:5901${NC}"
+    echo -e "Адрес: ${GREEN}${SERVER_IP}:5901${NC}"
     echo -e "Пароль: ${GREEN}$VNC_PASS${NC}"
     echo -e "\n${YELLOW}Для запуска OpenLedger используйте:${NC}"
     echo -e "${BLUE}openledger-node --no-sandbox${NC}"
@@ -63,6 +91,23 @@ remove_openledger() {
     rm -rf /opt/OpenLedger\ Node
     rm -f /usr/bin/openledger-node
     echo -e "${GREEN}[✓] OpenLedger Node удален${NC}"
+}
+
+# Добавим новую функцию для перезапуска VNC
+restart_vnc() {
+    echo -e "\n${YELLOW}[+] Перезапуск VNC сервера...${NC}"
+    
+    # Убиваем текущую сессию
+    vncserver -kill :1 >/dev/null 2>&1 || true
+    
+    # Очищаем файлы блокировки
+    rm -rf /tmp/.X1-lock
+    rm -rf /tmp/.X11-unix/X1
+    
+    # Запускаем заново
+    vncserver :1 -geometry 1920x1080 -depth 24
+    
+    echo -e "${GREEN}[✓] VNC сервер перезапущен${NC}"
 }
 
 # Главное меню

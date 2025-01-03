@@ -117,9 +117,10 @@ show_menu() {
         echo -e "\n${YELLOW}Выберите действие:${NC}"
         echo -e "${GREEN}1.${NC} Установить OpenLedger Node и VNC"
         echo -e "${RED}2.${NC} Удалить OpenLedger Node"
-        echo -e "${GREEN}3.${NC} Выход"
+        echo -e "${BLUE}3.${NC} Перезапустить VNC сервер"
+        echo -e "${GREEN}4.${NC} Выход"
         
-        read -p "Выберите опцию [1-3]: " choice
+        read -p "Выберите опцию [1-4]: " choice
         
         case $choice in
             1)
@@ -131,6 +132,10 @@ show_menu() {
                 break
                 ;;
             3)
+                restart_vnc
+                break
+                ;;
+            4)
                 echo -e "\n${GREEN}Спасибо за использование! До свидания!${NC}"
                 exit 0
                 ;;
